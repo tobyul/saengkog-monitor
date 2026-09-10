@@ -12,7 +12,7 @@
 // 테스트:
 // const API_BASE = "http://192.168.0.100:60891";
 
-const API_BASE = "https://reib.duckdns.org:60891";
+const API_BASE = "https://reib.duckdns.org:60891/api/trend";
 
 
 /* =========================================================
