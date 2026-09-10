@@ -7,7 +7,7 @@
 
 // app.js와 동일한 백엔드 주소를 입력하세요.
 
-const API_BASE = "https://reib.duckdns.org:60891";
+const API_BASE = "https://reib.duckdns.org:60892";
 
 
 /* =========================================================
