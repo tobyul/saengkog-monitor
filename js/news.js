@@ -5,23 +5,35 @@
    API 설정
 ========================================================= */
 
-// app.js와 동일한 백엔드 주소를 입력하세요.
+const API_BASE =
+    "https://reib.duckdns.org:60892";
 
-const API_BASE = "https://reib.duckdns.org:60892";
+
+/* =========================================================
+   뉴스 설정
+========================================================= */
+
+const NEWS_DAYS = 30;
 
 
 /* =========================================================
    상태
 ========================================================= */
 
-let currentQuery = "생곡소각장";
-let currentSort = "date";
+let currentQuery =
+    "생곡소각장";
 
-let currentPage = 1;
+let currentSort =
+    "date";
 
-const DISPLAY = 20;
+let currentPage =
+    1;
 
-let totalResults = 0;
+const DISPLAY =
+    20;
+
+let totalResults =
+    0;
 
 
 /* =========================================================
@@ -29,34 +41,64 @@ let totalResults = 0;
 ========================================================= */
 
 const searchInput =
-    document.getElementById("searchInput");
+    document.getElementById(
+        "searchInput"
+    );
 
 const searchButton =
-    document.getElementById("searchButton");
+    document.getElementById(
+        "searchButton"
+    );
 
 const clearButton =
-    document.getElementById("clearButton");
+    document.getElementById(
+        "clearButton"
+    );
 
 const sortSelect =
-    document.getElementById("sortSelect");
+    document.getElementById(
+        "sortSelect"
+    );
 
 const resultCount =
-    document.getElementById("resultCount");
+    document.getElementById(
+        "resultCount"
+    );
 
 const searchStatus =
-    document.getElementById("searchStatus");
+    document.getElementById(
+        "searchStatus"
+    );
 
 const newsResults =
-    document.getElementById("newsResults");
+    document.getElementById(
+        "newsResults"
+    );
 
 const prevButton =
-    document.getElementById("prevButton");
+    document.getElementById(
+        "prevButton"
+    );
 
 const nextButton =
-    document.getElementById("nextButton");
+    document.getElementById(
+        "nextButton"
+    );
 
 const pageInfo =
-    document.getElementById("pageInfo");
+    document.getElementById(
+        "pageInfo"
+    );
+
+
+/* =========================================================
+   검색기간 DOM
+========================================================= */
+
+const searchPeriod =
+    document.getElementById(
+        "searchPeriod"
+    );
 
 
 /* =========================================================
@@ -69,17 +111,21 @@ async function apiFetch(path) {
         API_BASE.replace(/\/$/, "") +
         path;
 
+
     const response =
         await fetch(url);
+
 
     if (!response.ok) {
 
         let message = "";
 
+
         try {
 
             const data =
                 await response.json();
+
 
             message =
                 data.message ||
@@ -90,11 +136,21 @@ async function apiFetch(path) {
             // ignore
         }
 
+
         throw new Error(
+
             `API 오류 ${response.status}` +
-            (message ? `: ${message}` : "")
+
+            (
+                message
+                    ? `: ${message}`
+                    : ""
+            )
+
         );
+
     }
+
 
     return await response.json();
 }
@@ -107,18 +163,33 @@ async function apiFetch(path) {
 function escapeHtml(value) {
 
     return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
-
-/*
- * 네이버 결과의 <b>강조</b>는 유지하고
- * 다른 HTML은 제거합니다.
- */
 
 function safeNaverHtml(value) {
 
@@ -126,36 +197,67 @@ function safeNaverHtml(value) {
         return "";
     }
 
-    const temp =
-        document.createElement("div");
 
-    temp.innerHTML = value;
+    const temp =
+        document.createElement(
+            "div"
+        );
+
+
+    temp.innerHTML =
+        value;
+
 
     const plainText =
         temp.textContent || "";
 
+
     let result =
-        escapeHtml(plainText);
+        escapeHtml(
+            plainText
+        );
+
 
     const boldWords =
-        [...temp.querySelectorAll("b")]
-            .map(item =>
-                item.textContent || ""
+
+        [
+            ...temp.querySelectorAll(
+                "b"
             )
+        ]
+
+            .map(
+                item =>
+                    item.textContent || ""
+            )
+
             .filter(Boolean);
 
-    for (const word of boldWords) {
+
+    for (
+        const word of boldWords
+    ) {
 
         const escaped =
-            escapeHtml(word);
+            escapeHtml(
+                word
+            );
+
 
         result =
+
             result
-                .split(escaped)
+
+                .split(
+                    escaped
+                )
+
                 .join(
                     `<b>${escaped}</b>`
                 );
+
     }
+
 
     return result;
 }
@@ -167,15 +269,27 @@ function safeUrl(value) {
         return "#";
     }
 
+
     const url =
         String(value).trim();
 
+
     if (
-        !url.startsWith("http://") &&
-        !url.startsWith("https://")
+
+        !url.startsWith(
+            "http://"
+        ) &&
+
+        !url.startsWith(
+            "https://"
+        )
+
     ) {
+
         return "#";
+
     }
+
 
     return escapeHtml(url);
 }
@@ -191,12 +305,21 @@ function formatDate(value) {
         return "";
     }
 
+
     const date =
         new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
         return value;
+
     }
+
 
     const year =
         date.getFullYear();
@@ -204,24 +327,85 @@ function formatDate(value) {
     const month =
         String(
             date.getMonth() + 1
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
 
     const day =
         String(
             date.getDate()
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
 
     const hour =
         String(
             date.getHours()
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
 
     const minute =
         String(
             date.getMinutes()
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
+
 
     return `${year}.${month}.${day} ${hour}:${minute}`;
+}
+
+
+function formatPeriodDate(value) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const parts =
+        value.split("-");
+
+
+    if (parts.length !== 3) {
+        return value;
+    }
+
+
+    return `${parts[0]}.${parts[1]}.${parts[2]}`;
+}
+
+
+/* =========================================================
+   검색기간 표시
+========================================================= */
+
+function updateSearchPeriod(
+    startDate,
+    endDate
+) {
+
+    if (!searchPeriod) {
+        return;
+    }
+
+
+    if (
+        startDate &&
+        endDate
+    ) {
+
+        searchPeriod.textContent =
+
+            `검색기간 ${formatPeriodDate(startDate)} ~ ${formatPeriodDate(endDate)}`;
+
+    }
+
 }
 
 
@@ -234,19 +418,26 @@ async function searchNews() {
     currentQuery =
         searchInput.value.trim();
 
+
     if (!currentQuery) {
 
         searchInput.focus();
 
         return;
+
     }
+
 
     currentSort =
         sortSelect.value;
 
-    currentPage = 1;
+
+    currentPage =
+        1;
+
 
     await loadNews();
+
 }
 
 
@@ -257,10 +448,15 @@ async function searchNews() {
 async function loadNews() {
 
     newsResults.innerHTML = `
+
         <div class="loading-box">
+
             뉴스를 검색하는 중입니다...
+
         </div>
+
     `;
+
 
     searchStatus.textContent =
         "검색 중...";
@@ -269,37 +465,61 @@ async function loadNews() {
     try {
 
         const start =
-            ((currentPage - 1) * DISPLAY) + 1;
+            (
+                (
+                    currentPage - 1
+                ) * DISPLAY
+            ) + 1;
+
 
         const query =
             encodeURIComponent(
                 currentQuery
             );
 
+
         const data =
             await apiFetch(
+
                 `/api/news?query=${query}` +
+
                 `&display=${DISPLAY}` +
+
                 `&start=${start}` +
-                `&sort=${currentSort}`
+
+                `&sort=${currentSort}` +
+
+                `&days=${NEWS_DAYS}`
+
             );
 
 
         if (!data.success) {
 
             throw new Error(
+
                 data.message ||
+
+                data.error ||
+
                 "뉴스 API 응답 오류"
+
             );
+
         }
 
 
         const result =
             data.data || {};
 
+
         const items =
             result.items || [];
 
+
+        /* -----------------------------------------
+           기간 내 전체 뉴스 수
+        ----------------------------------------- */
 
         totalResults =
             Number(
@@ -308,38 +528,81 @@ async function loadNews() {
 
 
         resultCount.textContent =
+
             totalResults.toLocaleString(
                 "ko-KR"
             );
 
 
+        /* -----------------------------------------
+           검색 기간
+        ----------------------------------------- */
+
+        updateSearchPeriod(
+
+            data.startDate,
+
+            data.endDate
+
+        );
+
+
+        /* -----------------------------------------
+           검색 상태
+        ----------------------------------------- */
+
         searchStatus.textContent =
-            `"${currentQuery}" 검색`;
+            `"${currentQuery}" 최근 ${NEWS_DAYS}일 검색`;
 
 
         renderNews(items);
 
         updatePagination();
 
+
     } catch (error) {
 
         console.error(error);
 
+
         newsResults.innerHTML = `
+
             <div class="error-box">
+
                 뉴스를 불러오지 못했습니다.
+
                 <br>
+
                 <small>
-                    ${escapeHtml(error.message)}
+
+                    ${escapeHtml(
+                        error.message
+                    )}
+
                 </small>
+
             </div>
+
         `;
+
 
         searchStatus.textContent =
             "검색 오류";
 
-        resultCount.textContent = "-";
+
+        resultCount.textContent =
+            "-";
+
+
+        if (searchPeriod) {
+
+            searchPeriod.textContent =
+                "검색 기간을 확인할 수 없습니다.";
+
+        }
+
     }
+
 }
 
 
@@ -352,64 +615,102 @@ function renderNews(items) {
     if (!items.length) {
 
         newsResults.innerHTML = `
+
             <div class="empty-box">
+
                 검색 결과가 없습니다.
+
             </div>
+
         `;
 
         return;
+
     }
 
 
     newsResults.innerHTML =
-        items.map(item => {
 
-            const title =
-                safeNaverHtml(
-                    item.title
-                );
+        items
 
-            const description =
-                safeNaverHtml(
-                    item.description
-                );
+            .map(item => {
 
-            const link =
-                safeUrl(
-                    item.link ||
-                    item.originallink
-                );
+                const title =
+                    safeNaverHtml(
+                        item.title
+                    );
 
-            return `
-                <a
-                    href="${link}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="news-result-item"
-                >
 
-                    <div class="news-result-title">
-                        ${title}
-                    </div>
+                const description =
+                    safeNaverHtml(
+                        item.description
+                    );
 
-                    <div class="news-result-meta">
 
-                        <span>
-                            ${formatDate(
-                                item.pubDate
-                            )}
-                        </span>
+                const link =
+                    safeUrl(
 
-                    </div>
+                        item.link ||
 
-                    <div class="news-result-description">
-                        ${description}
-                    </div>
+                        item.originallink
 
-                </a>
-            `;
+                    );
 
-        }).join("");
+
+                return `
+
+                    <a
+
+                        href="${link}"
+
+                        target="_blank"
+
+                        rel="noopener noreferrer"
+
+                        class="news-result-item"
+
+                    >
+
+                        <div
+                            class="news-result-title"
+                        >
+
+                            ${title}
+
+                        </div>
+
+
+                        <div
+                            class="news-result-meta"
+                        >
+
+                            <span>
+
+                                ${formatDate(
+                                    item.pubDate
+                                )}
+
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="news-result-description"
+                        >
+
+                            ${description}
+
+                        </div>
+
+                    </a>
+
+                `;
+
+            })
+
+            .join("");
+
 }
 
 
@@ -420,11 +721,15 @@ function renderNews(items) {
 function updatePagination() {
 
     const totalPages =
+
         Math.ceil(
-            totalResults / DISPLAY
+            totalResults /
+            DISPLAY
         );
 
+
     pageInfo.textContent =
+
         `${currentPage} / ${Math.max(
             totalPages,
             1
@@ -435,20 +740,18 @@ function updatePagination() {
         currentPage <= 1;
 
 
-    /*
-     * NAVER Search API의 start 최대값이
-     * 1000이므로 실제 접근 가능한 페이지는
-     * 50페이지 정도입니다.
-     */
-
     const maxPage =
         Math.min(
             totalPages,
             50
         );
 
+
     nextButton.disabled =
-        currentPage >= maxPage;
+
+        currentPage >=
+        maxPage;
+
 }
 
 
@@ -457,92 +760,148 @@ function updatePagination() {
 ========================================================= */
 
 searchButton.addEventListener(
+
     "click",
+
     searchNews
+
 );
 
 
 searchInput.addEventListener(
+
     "keydown",
+
     function(event) {
 
-        if (event.key === "Enter") {
+        if (
+            event.key === "Enter"
+        ) {
+
             searchNews();
+
         }
+
     }
+
 );
 
 
 sortSelect.addEventListener(
+
     "change",
+
     function() {
 
         currentSort =
             this.value;
 
-        currentPage = 1;
+
+        currentPage =
+            1;
+
 
         loadNews();
+
     }
+
 );
 
 
 clearButton.addEventListener(
+
     "click",
+
     function() {
 
         searchInput.value = "";
 
         searchInput.focus();
+
     }
+
 );
 
 
 prevButton.addEventListener(
+
     "click",
+
     function() {
 
-        if (currentPage <= 1) {
+        if (
+            currentPage <= 1
+        ) {
+
             return;
+
         }
+
 
         currentPage--;
 
+
         loadNews();
 
+
         window.scrollTo({
+
             top: 0,
+
             behavior: "smooth"
+
         });
+
     }
+
 );
 
 
 nextButton.addEventListener(
+
     "click",
+
     function() {
 
         const maxPage =
+
             Math.min(
+
                 Math.ceil(
-                    totalResults / DISPLAY
+                    totalResults /
+                    DISPLAY
                 ),
+
                 50
+
             );
 
-        if (currentPage >= maxPage) {
+
+        if (
+            currentPage >= maxPage
+        ) {
+
             return;
+
         }
+
 
         currentPage++;
 
+
         loadNews();
 
+
         window.scrollTo({
+
             top: 0,
+
             behavior: "smooth"
+
         });
+
     }
+
 );
 
 
@@ -551,10 +910,13 @@ nextButton.addEventListener(
 ========================================================= */
 
 document.addEventListener(
+
     "DOMContentLoaded",
+
     function() {
 
         loadNews();
 
     }
+
 );
