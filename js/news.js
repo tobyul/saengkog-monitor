@@ -1,5 +1,7 @@
 "use strict";
 
+console.log("news.js 로드됨 (최대 버튼 포함 버전)");
+
 const API_BASE = "https://reib.duckdns.org:60892";
 
 const DISPLAY = 20;
@@ -8,7 +10,6 @@ let currentQuery = "생곡소각장";
 let currentSort = "date";
 let currentPage = 1;
 let currentDays = 30;
-let currentYear = null;
 let totalResults = 0;
 
 /* =========================================
@@ -20,7 +21,6 @@ const searchButton = document.getElementById("searchButton");
 const clearButton = document.getElementById("clearButton");
 const sortSelect = document.getElementById("sortSelect");
 const periodButtons = document.getElementById("periodButtons");
-const yearSelect = document.getElementById("yearSelect");
 
 const resultCount = document.getElementById("resultCount");
 const searchPeriod = document.getElementById("searchPeriod");
@@ -369,20 +369,7 @@ try {
         "&sort=" +
         currentSort;
 
-    if (currentYear) {
-
-        apiPath +=
-            "&startDate=" +
-            currentYear +
-            "-01-01" +
-            "&endDate=" +
-            (
-                currentYear === new Date().getFullYear()
-                    ? getLocalDateString(new Date())
-                    : currentYear + "-12-31"
-            );
-
-    } else if (currentDays === "max") {
+    if (currentDays === "max") {
 
         /*
             네이버 API 자체가 최신순 최대 1,000건까지만
@@ -474,25 +461,25 @@ try {
 
     if (
         searchPeriod &&
-        result.startDate &&
-        result.endDate
+        data.startDate &&
+        data.endDate
     ) {
 
         searchPeriod.textContent =
             formatPeriodDate(
-                result.startDate
+                data.startDate
             ) +
             " ~ " +
             formatPeriodDate(
-                result.endDate
+                data.endDate
             );
     }
     else if (searchPeriod) {
 
         searchPeriod.textContent =
-            "최근 " +
-            currentDays +
-            "일";
+            currentDays === "max"
+                ? "전체 기간"
+                : "최근 " + currentDays + "일";
     }
 
 
@@ -790,69 +777,6 @@ periodButtons.addEventListener(
 
         currentDays =
             daysValue === "max" ? "max" : Number(daysValue);
-
-        currentYear = null;
-
-        if (yearSelect) {
-            yearSelect.value = "";
-        }
-
-        currentPage = 1;
-
-        loadNews();
-    }
-);
-
-}
-
-/* =========================================
-연도 선택
-========================================= */
-
-if (yearSelect) {
-
-const thisYear =
-    new Date().getFullYear();
-
-for (
-    let year = thisYear;
-    year >= thisYear - 9;
-    year--
-) {
-
-    const option =
-        document.createElement("option");
-
-    option.value = year;
-    option.textContent = year + "년";
-
-    yearSelect.appendChild(option);
-}
-
-yearSelect.addEventListener(
-    "change",
-    function() {
-
-        currentYear =
-            this.value ? Number(this.value) : null;
-
-        periodButtons
-            .querySelectorAll(".period-btn")
-            .forEach(function(b) {
-                b.classList.remove("active");
-            });
-
-        if (!currentYear) {
-
-            const defaultButton =
-                periodButtons.querySelector('[data-days="30"]');
-
-            if (defaultButton) {
-                defaultButton.classList.add("active");
-            }
-
-            currentDays = 30;
-        }
 
         currentPage = 1;
 
