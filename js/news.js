@@ -2,12 +2,12 @@
 
 const API_BASE = "https://reib.duckdns.org:60892";
 
-const NEWS_DAYS = 30;
 const DISPLAY = 20;
 
 let currentQuery = "생곡소각장";
 let currentSort = "date";
 let currentPage = 1;
+let currentDays = 30;
 let totalResults = 0;
 
 /* =========================================
@@ -18,6 +18,7 @@ const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 const clearButton = document.getElementById("clearButton");
 const sortSelect = document.getElementById("sortSelect");
+const periodButtons = document.getElementById("periodButtons");
 
 const resultCount = document.getElementById("resultCount");
 const searchPeriod = document.getElementById("searchPeriod");
@@ -352,7 +353,7 @@ try {
         "&sort=" +
         currentSort +
         "&days=" +
-        NEWS_DAYS;
+        currentDays;
 
     console.log(
         "뉴스 API 요청:",
@@ -442,7 +443,7 @@ try {
 
         searchPeriod.textContent =
             "최근 " +
-            NEWS_DAYS +
+            currentDays +
             "일";
     }
 
@@ -702,6 +703,42 @@ sortSelect.addEventListener(
 
         currentSort =
             this.value;
+
+        currentPage = 1;
+
+        loadNews();
+    }
+);
+
+}
+
+/* =========================================
+기간 변경
+========================================= */
+
+if (periodButtons) {
+
+periodButtons.addEventListener(
+    "click",
+    function(event) {
+
+        const button =
+            event.target.closest(".period-btn");
+
+        if (!button) {
+            return;
+        }
+
+        periodButtons
+            .querySelectorAll(".period-btn")
+            .forEach(function(b) {
+                b.classList.remove("active");
+            });
+
+        button.classList.add("active");
+
+        currentDays =
+            Number(button.dataset.days);
 
         currentPage = 1;
 
