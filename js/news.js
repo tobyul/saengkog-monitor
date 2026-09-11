@@ -8,6 +8,7 @@ let currentQuery = "생곡소각장";
 let currentSort = "date";
 let currentPage = 1;
 let currentDays = 30;
+let currentYear = null;
 let totalResults = 0;
 
 /* =========================================
@@ -19,6 +20,7 @@ const searchButton = document.getElementById("searchButton");
 const clearButton = document.getElementById("clearButton");
 const sortSelect = document.getElementById("sortSelect");
 const periodButtons = document.getElementById("periodButtons");
+const yearSelect = document.getElementById("yearSelect");
 
 const resultCount = document.getElementById("resultCount");
 const searchPeriod = document.getElementById("searchPeriod");
@@ -169,6 +171,20 @@ return escapeHtml(url);
 /* =========================================
 검색 기간 날짜
 ========================================= */
+
+function getLocalDateString(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(date.getMonth() + 1).padStart(2, "0");
+
+    const day =
+        String(date.getDate()).padStart(2, "0");
+
+    return year + "-" + month + "-" + day;
+}
 
 function formatPeriodDate(value) {
 
@@ -342,7 +358,7 @@ try {
             currentQuery
         );
 
-    const apiPath =
+    let apiPath =
         "/api/news" +
         "?query=" +
         query +
@@ -351,9 +367,41 @@ try {
         "&start=" +
         start +
         "&sort=" +
-        currentSort +
-        "&days=" +
-        currentDays;
+        currentSort;
+
+    if (currentYear) {
+
+        apiPath +=
+            "&startDate=" +
+            currentYear +
+            "-01-01" +
+            "&endDate=" +
+            (
+                currentYear === new Date().getFullYear()
+                    ? getLocalDateString(new Date())
+                    : currentYear + "-12-31"
+            );
+
+    } else if (currentDays === "max") {
+
+        /*
+            네이버 API 자체가 최신순 최대 1,000건까지만
+            내려주기 때문에, 시작일을 충분히 과거로 잡아두면
+            사실상 "가능한 전체"를 가져오는 효과가 된다.
+        */
+
+        apiPath +=
+            "&startDate=2000-01-01" +
+            "&endDate=" +
+            getLocalDateString(new Date());
+
+    } else {
+
+        apiPath +=
+            "&days=" +
+            currentDays;
+
+    }
 
     console.log(
         "뉴스 API 요청:",
@@ -737,8 +785,74 @@ periodButtons.addEventListener(
 
         button.classList.add("active");
 
+        const daysValue =
+            button.dataset.days;
+
         currentDays =
-            Number(button.dataset.days);
+            daysValue === "max" ? "max" : Number(daysValue);
+
+        currentYear = null;
+
+        if (yearSelect) {
+            yearSelect.value = "";
+        }
+
+        currentPage = 1;
+
+        loadNews();
+    }
+);
+
+}
+
+/* =========================================
+연도 선택
+========================================= */
+
+if (yearSelect) {
+
+const thisYear =
+    new Date().getFullYear();
+
+for (
+    let year = thisYear;
+    year >= thisYear - 9;
+    year--
+) {
+
+    const option =
+        document.createElement("option");
+
+    option.value = year;
+    option.textContent = year + "년";
+
+    yearSelect.appendChild(option);
+}
+
+yearSelect.addEventListener(
+    "change",
+    function() {
+
+        currentYear =
+            this.value ? Number(this.value) : null;
+
+        periodButtons
+            .querySelectorAll(".period-btn")
+            .forEach(function(b) {
+                b.classList.remove("active");
+            });
+
+        if (!currentYear) {
+
+            const defaultButton =
+                periodButtons.querySelector('[data-days="30"]');
+
+            if (defaultButton) {
+                defaultButton.classList.add("active");
+            }
+
+            currentDays = 30;
+        }
 
         currentPage = 1;
 
