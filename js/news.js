@@ -35,7 +35,6 @@ API 호출
 
 async function apiFetch(path) {
 
-```
 const url =
     API_BASE.replace(/\/$/, "") + path;
 
@@ -68,7 +67,6 @@ if (!response.ok) {
 }
 
 return await response.json();
-```
 
 }
 
@@ -78,7 +76,6 @@ HTML Escape
 
 function escapeHtml(value) {
 
-```
 if (
     value === null ||
     value === undefined
@@ -92,7 +89,6 @@ return String(value)
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-```
 
 }
 
@@ -102,7 +98,6 @@ return String(value)
 
 function safeNaverHtml(value) {
 
-```
 if (!value) {
     return "";
 }
@@ -143,7 +138,6 @@ boldWords.forEach(function(word) {
 });
 
 return result;
-```
 
 }
 
@@ -153,7 +147,6 @@ URL 처리
 
 function safeUrl(value) {
 
-```
 if (!value) {
     return "#";
 }
@@ -169,7 +162,6 @@ if (
 }
 
 return escapeHtml(url);
-```
 
 }
 
@@ -179,7 +171,6 @@ return escapeHtml(url);
 
 function formatPeriodDate(value) {
 
-```
 if (!value) {
     return "";
 }
@@ -215,7 +206,6 @@ return (
     "." +
     day
 );
-```
 
 }
 
@@ -225,7 +215,6 @@ return (
 
 function formatDate(value) {
 
-```
 if (!value) {
     return "";
 }
@@ -275,7 +264,6 @@ return (
     ":" +
     minute
 );
-```
 
 }
 
@@ -285,7 +273,6 @@ return (
 
 async function searchNews() {
 
-```
 if (!searchInput) {
     return;
 }
@@ -309,7 +296,6 @@ if (sortSelect) {
 currentPage = 1;
 
 await loadNews();
-```
 
 }
 
@@ -319,7 +305,6 @@ await loadNews();
 
 async function loadNews() {
 
-```
 if (!newsResults) {
 
     console.error(
@@ -523,7 +508,6 @@ catch (error) {
 
     updatePagination();
 }
-```
 
 }
 
@@ -533,7 +517,6 @@ catch (error) {
 
 function renderNews(items) {
 
-```
 if (!newsResults) {
 
     console.error(
@@ -622,7 +605,6 @@ items.forEach(function(item) {
 
 newsResults.innerHTML =
     html;
-```
 
 }
 
@@ -632,7 +614,6 @@ newsResults.innerHTML =
 
 function updatePagination() {
 
-```
 const totalPages =
     Math.ceil(
         totalResults /
@@ -671,7 +652,6 @@ if (nextButton) {
     nextButton.disabled =
         currentPage >= maxPage;
 }
-```
 
 }
 
@@ -681,12 +661,10 @@ if (nextButton) {
 
 if (searchButton) {
 
-```
 searchButton.addEventListener(
     "click",
     searchNews
 );
-```
 
 }
 
@@ -696,7 +674,6 @@ Enter 검색
 
 if (searchInput) {
 
-```
 searchInput.addEventListener(
     "keydown",
     function(event) {
@@ -710,7 +687,6 @@ searchInput.addEventListener(
         }
     }
 );
-```
 
 }
 
@@ -720,7 +696,6 @@ searchInput.addEventListener(
 
 if (sortSelect) {
 
-```
 sortSelect.addEventListener(
     "change",
     function() {
@@ -733,7 +708,6 @@ sortSelect.addEventListener(
         loadNews();
     }
 );
-```
 
 }
 
@@ -743,7 +717,6 @@ sortSelect.addEventListener(
 
 if (clearButton) {
 
-```
 clearButton.addEventListener(
     "click",
     function() {
@@ -757,7 +730,6 @@ clearButton.addEventListener(
         searchInput.focus();
     }
 );
-```
 
 }
 
@@ -767,7 +739,6 @@ clearButton.addEventListener(
 
 if (prevButton) {
 
-```
 prevButton.addEventListener(
     "click",
     function() {
@@ -788,7 +759,6 @@ prevButton.addEventListener(
         });
     }
 );
-```
 
 }
 
@@ -798,7 +768,6 @@ prevButton.addEventListener(
 
 if (nextButton) {
 
-```
 nextButton.addEventListener(
     "click",
     function() {
@@ -832,7 +801,6 @@ nextButton.addEventListener(
         });
     }
 );
-```
 
 }
 
@@ -842,7 +810,6 @@ nextButton.addEventListener(
 
 function initializeNewsPage() {
 
-```
 console.log(
     "뉴스 페이지 초기화"
 );
@@ -878,7 +845,6 @@ console.log(
 
 
 loadNews();
-```
 
 }
 
@@ -891,18 +857,14 @@ document.readyState ===
 "loading"
 ) {
 
-```
 document.addEventListener(
     "DOMContentLoaded",
     initializeNewsPage
 );
-```
 
 }
 else {
 
-```
 initializeNewsPage();
-```
 
 }
